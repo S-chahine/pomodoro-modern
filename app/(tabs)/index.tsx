@@ -1,5 +1,5 @@
+import Controls from "@/components/Controls";
 import Timer from "@/components/Timer";
-import Controls from "@/components/ui/Controls";
 import { useEffect, useState } from "react";
 import { View } from "react-native";
 
