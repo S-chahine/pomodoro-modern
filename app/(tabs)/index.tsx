@@ -1,22 +1,27 @@
 import Controls from "@/components/Controls";
+import Mode from "@/components/Mode";
 import Timer from "@/components/Timer";
 import { useEffect, useState } from "react";
-import { View } from "react-native";
+import { Alert, View } from "react-native";
+
+
+type Modes = "work" | "short" | "long"; 
 
 export default function HomeScreen() {
   const [duration, setDuration] = useState({ work: 25, short: 5, long: 10 });
-  const [mode, setMode] = useState("work");
+  const [mode, setMode] = useState<Modes>("work");
   const [status, setStatus] = useState("idle");
   const [timeRemaining, setTimeRemaining] = useState(duration.work * 60);
 
   useEffect(() => {
     let timer: ReturnType<typeof setTimeout> | undefined;
 
+    // Run timer 
     if (status === "running" && timeRemaining > 0) {
       timer = setTimeout(() => {
         setTimeRemaining((prev) => prev - 1);
       }, 1000);
-    } else if (status === "running" && timeRemaining === 0) {
+    } else if (status === "running" && timeRemaining === 0) { 
       setStatus("done");
     }
 
@@ -30,11 +35,21 @@ export default function HomeScreen() {
     setStatus(status);
   };
 
+  const handleModeChange = (newMode: Modes) => {
+    if(status !== "idle" && status !== "done"){
+      Alert.alert("Timer Running", "Please wait until timer is done or reset before switching modes");
+      return;
+    }
+    setMode(newMode);
+    setTimeRemaining(duration[newMode] * 60);
+  }
+
   const handleResetTimer = () => {
-    setTimeRemaining(duration.work * 60);
+    setTimeRemaining(duration[mode] * 60);
   };
   return (
     <View className="flex-1 justify-center items-center gap-8">
+      <Mode mode={mode} handleModeChange={handleModeChange}/>
       <Timer timeRemaining={timeRemaining} />
       <Controls
         status={status}

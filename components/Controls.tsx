@@ -12,42 +12,38 @@ const Controls = ({
   handleStatusChange,
   handleResetTimer,
 }: ControlsProps) => {
-  const handleStartReset = () => {
-    if (status !== "running") {
+
+  const handleStartPause = () => {
+      if (status !== "running") {
       handleStatusChange("running");
     } else if (status === "running") {
+      handleStatusChange("Paused");
+    }
+    };
+
+  const handleReset = () => {
+      handleStatusChange("idle");
       handleResetTimer();
-    }
-  };
-
-  const handlePause = () => {
-    if (status === "running") {
-      handleStatusChange("paused");
-    } else if (status === "paused") {
-      handleStatusChange("running");
-    }
-  };
-
+  }
+    
   return (
     <View className="flex flex-row gap-4">
       <Button
         variant="solid"
         size="xl"
-        onPress={handleStartReset}
+        onPress={handleStartPause}
         className="rounded-xl"
       >
-        <ButtonText>{status === "running" ? "Reset" : "Start"}</ButtonText>
+        <ButtonText>{status === "running" ? "Pause" : "Start"}</ButtonText>
       </Button>
-      {(status === "running" || status === "paused") && (
-        <Button
+      <Button
           variant="solid"
           size="xl"
-          onPress={handlePause}
+          onPress={handleReset}
           className="rounded-xl"
         >
-          <ButtonText>{status === "paused" ? "Resume" : "Pause"}</ButtonText>
+          <ButtonText>Reset</ButtonText>
         </Button>
-      )}
     </View>
   );
 };
