@@ -25,8 +25,8 @@ const Mode = ({ mode, durations, disabled, handleModeChange }: ModeProps) => {
             className={`items-center rounded-xl px-4 py-3 ${
               isActive
                 ? tab === "work"
-                  ? "bg-primary-100"
-                  : "bg-secondary-100"
+                  ? "bg-primary-500/20"
+                  : "bg-secondary-100/20"
                 : ""
             } ${disabled ? "opacity-50" : "opacity-100"}`}
           >

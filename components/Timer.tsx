@@ -1,6 +1,8 @@
 import { TIMER_SUBTITLES } from "@/constants/timer";
 import type { TimerMode, TimerStatus } from "@/types/timer";
-import { Text, View } from "react-native";
+import ProgressRing from "./ProgressRing";
+import TimerDisplay from "./TimerDisplay";
+import { View } from "react-native";
 
 type TimerProps = {
   timeRemaining: number;
@@ -19,25 +21,17 @@ const Timer = ({ timeRemaining, mode, status, progress }: TimerProps) => {
       .padStart(2, "0")}`;
   };
 
-  const ringColor = mode === "work" ? "border-primary-500" : "border-secondary-500";
-
+  const formattedTime = formatTime(timeRemaining);
+  
   return (
     <View className="h-80 w-80 items-center justify-center rounded-full bg-background-50">
-      <View
-        className={`h-72 w-72 items-center justify-center rounded-full border-8 ${ringColor}`}
-      >
-        <Text className="font-mono text-6xl font-bold text-typography-900">
-          {formatTime(timeRemaining)}
-        </Text>
-
-        <Text className="mt-3 text-sm uppercase tracking-widest text-typography-500">
-          {TIMER_SUBTITLES[mode]}
-        </Text>
-
-        <Text className="mt-2 text-xs text-typography-400">
-          {Math.round(progress)}%
-        </Text>
-      </View>
+        <ProgressRing progress={progress} mode={mode}>
+        <TimerDisplay
+        time={formattedTime}
+        mode={mode}
+        isRunning={status === "running"}
+      />
+    </ProgressRing>
     </View>
   );
 };

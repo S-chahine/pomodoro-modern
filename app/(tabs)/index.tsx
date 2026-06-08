@@ -2,10 +2,11 @@ import Controls from "@/components/Controls";
 import Mode from "@/components/Mode";
 import SessionCounter from "@/components/SessionCounter";
 import Timer from "@/components/Timer";
+import { Timer as TimerIcon } from "lucide-react-native";
 import { DEFAULT_DURATIONS } from "@/constants/timer";
 import type { TimerMode, TimerStatus, TimerDurations } from "@/types/timer";
 import { useEffect, useState } from "react";
-import { Alert, View, Text } from "react-native";
+import { View, Text } from "react-native";
 
 export default function HomeScreen() {
   const [durations, setDurations] =
@@ -41,7 +42,8 @@ export default function HomeScreen() {
       if (timer) clearTimeout(timer);
     };
   }, [timeRemaining, status, mode]);
-
+ 
+  
   const handleStart = () => {
     if (timeRemaining === 0) return;
     setStatus("running");
@@ -57,14 +59,6 @@ export default function HomeScreen() {
   };
 
   const handleModeChange = (newMode: TimerMode) => {
-    if (status === "running") {
-      Alert.alert(
-        "Timer Running",
-        "Please pause or reset the timer before switching modes."
-      );
-      return;
-    }
-
     setMode(newMode);
     setStatus("idle");
     setTimeRemaining(durations[newMode] * 60);
@@ -76,9 +70,11 @@ export default function HomeScreen() {
 
   return (
     <View className="flex-1 items-center justify-center gap-8 bg-background-0 px-4">
-      <View className="items-center gap-2">
-        <View className="h-12 w-12 items-center justify-center rounded-2xl bg-primary-100">
-          <Text className="text-2xl">⏱️</Text>
+      <View className="flex flex-row items-center gap-2">
+        <View className="h-12 w-12 items-center justify-center rounded-2xl bg-primary-500/20">
+          <Text>
+            <TimerIcon color="#F25A5A" />
+          </Text>
         </View>
 
         <Text className="text-2xl font-bold text-typography-900">
