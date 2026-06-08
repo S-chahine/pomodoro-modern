@@ -7,6 +7,7 @@ import { DEFAULT_DURATIONS } from "@/constants/timer";
 import type { TimerMode, TimerStatus, TimerDurations } from "@/types/timer";
 import { useEffect, useState } from "react";
 import { View, Text } from "react-native";
+import { useSound } from "@/hooks/useSound";
 
 export default function HomeScreen() {
   const [durations, setDurations] =
@@ -17,6 +18,8 @@ export default function HomeScreen() {
   const [timeRemaining, setTimeRemaining] = useState(durations.work * 60);
   const [completedSessions, setCompletedSessions] = useState(0);
   const [soundEnabled, setSoundEnabled] = useState(true);
+
+  const { playClick, playComplete } = useSound();
 
   const totalTime = durations[mode] * 60;
 
@@ -33,6 +36,10 @@ export default function HomeScreen() {
     } else if (status === "running" && timeRemaining === 0) {
       setStatus("done");
 
+      if (soundEnabled) {
+        playComplete();
+      }
+
       if (mode === "work") {
         setCompletedSessions((prev) => Math.min(prev + 1, 4));
       }
@@ -42,18 +49,29 @@ export default function HomeScreen() {
       if (timer) clearTimeout(timer);
     };
   }, [timeRemaining, status, mode]);
- 
-  
+
+
   const handleStart = () => {
     if (timeRemaining === 0) return;
+
+    if (soundEnabled) {
+      playClick();
+    }
+
     setStatus("running");
   };
 
   const handlePause = () => {
+    if (soundEnabled) {
+      playClick();
+    }
     setStatus("paused");
   };
 
   const handleResetTimer = () => {
+    if (soundEnabled) {
+      playClick();
+    }
     setStatus("idle");
     setTimeRemaining(durations[mode] * 60);
   };

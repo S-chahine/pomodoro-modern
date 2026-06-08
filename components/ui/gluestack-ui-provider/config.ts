@@ -20,7 +20,7 @@ export const config = {
   /* Secondary - Break teal */
   '--color-secondary-0': '250 255 253',
   '--color-secondary-50': '240 253 250',
-  '--color-secondary-100': '204 251 241',
+  '--color-secondary-100': '145 225 208',
   '--color-secondary-200': '153 246 228',
   '--color-secondary-300': '94 234 212',
   '--color-secondary-400': '71 209 182',
