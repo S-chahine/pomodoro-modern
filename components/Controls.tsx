@@ -1,49 +1,71 @@
-import { Button, ButtonText } from "@/components/ui/button";
-import { View } from "react-native";
+import type { TimerMode, TimerStatus } from "@/types/timer";
+import {
+  Pause,
+  Play,
+  RotateCcw,
+  Volume2,
+  VolumeX,
+} from "lucide-react-native";
+import { Pressable, View } from "react-native";
 
 type ControlsProps = {
-  status: string;
-  handleStatusChange: (newStatus: string) => void;
-  handleResetTimer: () => void;
+  status: TimerStatus;
+  mode: TimerMode;
+  soundEnabled: boolean;
+  onStart: () => void;
+  onPause: () => void;
+  onReset: () => void;
+  onToggleSound: () => void;
 };
 
 const Controls = ({
   status,
-  handleStatusChange,
-  handleResetTimer,
+  mode,
+  soundEnabled,
+  onStart,
+  onPause,
+  onReset,
+  onToggleSound,
 }: ControlsProps) => {
+  const isRunning = status === "running";
+  const isDone = status === "done";
 
-  const handleStartPause = () => {
-      if (status !== "running") {
-      handleStatusChange("running");
-    } else if (status === "running") {
-      handleStatusChange("Paused");
-    }
-    };
+  const mainButtonClass =
+    mode === "work" ? "bg-primary-500" : "bg-secondary-500";
 
-  const handleReset = () => {
-      handleStatusChange("idle");
-      handleResetTimer();
-  }
-    
   return (
-    <View className="flex flex-row gap-4">
-      <Button
-        variant="solid"
-        size="xl"
-        onPress={handleStartPause}
-        className="rounded-xl"
+    <View className="flex-row items-center gap-5">
+      <Pressable
+        onPress={onReset}
+        className="h-12 w-12 items-center justify-center rounded-full bg-background-100"
       >
-        <ButtonText>{status === "running" ? "Pause" : "Start"}</ButtonText>
-      </Button>
-      <Button
-          variant="solid"
-          size="xl"
-          onPress={handleReset}
-          className="rounded-xl"
-        >
-          <ButtonText>Reset</ButtonText>
-        </Button>
+        <RotateCcw size={22} color="#71717a" />
+      </Pressable>
+
+      <Pressable
+        disabled={isDone}
+        onPress={isRunning ? onPause : onStart}
+        className={`h-20 w-20 items-center justify-center rounded-full ${mainButtonClass} ${
+          isDone ? "opacity-50" : "opacity-100"
+        }`}
+      >
+        {isRunning ? (
+          <Pause size={34} color="white" />
+        ) : (
+          <Play size={34} color="white" />
+        )}
+      </Pressable>
+
+      <Pressable
+        onPress={onToggleSound}
+        className="h-12 w-12 items-center justify-center rounded-full bg-background-100"
+      >
+        {soundEnabled ? (
+          <Volume2 size={22} color="#71717a" />
+        ) : (
+          <VolumeX size={22} color="#71717a" />
+        )}
+      </Pressable>
     </View>
   );
 };
