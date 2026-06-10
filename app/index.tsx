@@ -1,25 +1,36 @@
 import Controls from "@/components/Controls";
 import Mode from "@/components/Mode";
 import SessionCounter from "@/components/SessionCounter";
+import Settings from "@/components/Settings";
 import Timer from "@/components/Timer";
-import { Timer as TimerIcon } from "lucide-react-native";
-import { DEFAULT_DURATIONS } from "@/constants/timer";
-import type { TimerMode, TimerStatus, TimerDurations } from "@/types/timer";
+import { Timer as TimerIcon, Settings2, ChevronUp, ChevronDown } from "lucide-react-native";
+import { CLASSIC_DURATIONS, presetDurations } from "@/constants/timer";
+import { type TimerMode, type TimerStatus, type TimerDurations, type PresetMode } from "@/types/timer";
 import { useEffect, useState } from "react";
-import { View, Text } from "react-native";
+import { View, Text, ScrollView } from "react-native";
 import { useSound } from "@/hooks/useSound";
+import { Button } from "@/components/ui/button";
+import { useColorScheme } from "@/hooks/use-color-scheme";
 
 export default function HomeScreen() {
+
+
+  const colorScheme = useColorScheme();
+
+  const iconColor = colorScheme === "dark" ? "#8C8C8C" : "#737373";
+
   const [durations, setDurations] =
-    useState<TimerDurations>(DEFAULT_DURATIONS);
+    useState<TimerDurations>(CLASSIC_DURATIONS);
 
   const [mode, setMode] = useState<TimerMode>("work");
   const [status, setStatus] = useState<TimerStatus>("idle");
   const [timeRemaining, setTimeRemaining] = useState(durations.work * 60);
   const [completedSessions, setCompletedSessions] = useState(0);
   const [soundEnabled, setSoundEnabled] = useState(true);
+  const [presetMode, setPresetMode] = useState<PresetMode>("classic");
 
   const { playClick, playComplete } = useSound();
+  const [isOpen, setIsOpen] = useState(false);
 
   const totalTime = durations[mode] * 60;
 
@@ -48,7 +59,7 @@ export default function HomeScreen() {
     return () => {
       if (timer) clearTimeout(timer);
     };
-  }, [timeRemaining, status, mode]);
+  }, [timeRemaining, status, mode, presetMode]);
 
 
   const handleStart = () => {
@@ -86,13 +97,26 @@ export default function HomeScreen() {
     setSoundEnabled((prev) => !prev);
   };
 
+
+  const handlePresetModeChange = (newPresetMode: PresetMode) => {
+    setPresetMode(newPresetMode);
+    setDurations(presetDurations[newPresetMode]);
+  }
+
   return (
-    <View className="flex-1 items-center justify-center gap-8 bg-background-0 px-4">
-      <View className="flex flex-row items-center gap-2">
+<ScrollView
+  className="flex-1 bg-background-0"
+  contentContainerStyle={{
+    alignItems: "center",
+    gap: 32,
+    paddingHorizontal: 16,
+    paddingVertical: 40,
+  }}
+  showsVerticalScrollIndicator={true}
+>
+  <View className="flex flex-row items-center gap-2">
         <View className="h-12 w-12 items-center justify-center rounded-2xl bg-primary-500/20">
-          <Text>
             <TimerIcon color="#F25A5A" />
-          </Text>
         </View>
 
         <Text className="text-2xl font-bold text-typography-900">
@@ -126,9 +150,30 @@ export default function HomeScreen() {
 
       <SessionCounter completed={completedSessions} />
 
+      <Button action="primary" variant="link" size="lg" onPress={() => setIsOpen((prev) => !prev)}>
+        <Settings2 size={18} color={iconColor} />
+        <Text className="text-lg font-semibold text-typography-500">
+          Settings
+        </Text>
+        {isOpen ? (
+          <ChevronUp size={18} color={iconColor} />
+        ) : (
+          <ChevronDown size={18} color={iconColor} />
+        )}
+      </Button>
+      {isOpen &&
+        <Settings
+          presetMode={presetMode}
+          handlePresetModeChange={handlePresetModeChange}
+        />}
+
+
       <Text className="max-w-xs text-center text-xs text-typography-500">
         Complete 4 focus sessions to earn a long break. Stay productive!
       </Text>
-    </View>
+
+
+
+    </ScrollView>
   );
 }

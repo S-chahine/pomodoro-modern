@@ -1,19 +1,12 @@
-import { TIMER_LABELS } from "@/constants/timer";
-import type { TimerDurations, TimerMode } from "@/types/timer";
+import { TIMER_LABELS, tabs } from "@/constants/timer";
+import type { ModeProps } from "@/types/mode";
 import { Pressable, Text, View } from "react-native";
 
-type ModeProps = {
-  mode: TimerMode;
-  durations: TimerDurations;
-  disabled: boolean;
-  handleModeChange: (mode: TimerMode) => void;
-};
 
-const tabs: TimerMode[] = ["work", "shortBreak", "longBreak"];
 
 const Mode = ({ mode, durations, disabled, handleModeChange }: ModeProps) => {
   return (
-    <View className="flex-row gap-2 rounded-2xl bg-background-100 p-2">
+    <View className="flex-row gap-2 rounded-2xl bg-background-muted/50 p-2">
       {tabs.map((tab) => {
         const isActive = mode === tab;
 

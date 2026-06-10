@@ -71,7 +71,7 @@ const buttonStyle = tva({
       action: 'primary',
       variant: 'link',
       class:
-        'px-0 bg-transparent data-[hover=true]:bg-transparent data-[active=true]:bg-transparent',
+        'px-3 rounded-xl bg-transparent data-[hover=true]:bg-tertiary-500 data-[active=true]:bg-transparent',
     },
     {
       action: 'secondary',
