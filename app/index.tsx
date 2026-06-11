@@ -113,8 +113,7 @@ export default function HomeScreen() {
     paddingVertical: 40,
   }}
   showsVerticalScrollIndicator={true}
->
-  <View className="flex flex-row items-center gap-2">
+><View className="flex flex-row items-center gap-2">
         <View className="h-12 w-12 items-center justify-center rounded-2xl bg-primary-500/20">
             <TimerIcon color="#F25A5A" />
         </View>

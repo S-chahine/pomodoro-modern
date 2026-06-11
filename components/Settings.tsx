@@ -16,6 +16,8 @@ const Settings = ({ presetMode, handlePresetModeChange }: SettingsProps) => {
   const [customPreset, setCustomPreset] = useState<TimerDurations>(CLASSIC_DURATIONS);
 
   const colorScheme = useColorScheme();
+  const iconColor = colorScheme === "dark" ? "#FFFFFF" : "#8C8C8C";
+
   return (
     <View className="flex gap-2 py-4 justify-center items-center rounded-2xl bg-background-muted/20">
       <View className="flex max-w-sm gap-2">
@@ -54,13 +56,13 @@ const Settings = ({ presetMode, handlePresetModeChange }: SettingsProps) => {
           <Button
             action="primary" variant="link" size="lg"
             onPress={() => setIsOpen((prev) => !prev)}
-            className={`border border-background-300 rounded-2xl ${isOpen
-              ? "bg-teal-400 data-[hover=true]:bg-teal-500"
-              : ""
+            className={`border rounded-2xl  ${isOpen
+                ? "border-transparent bg-teal-400 data-[active=true]:bg-teal-500 data-[active=true]:border-transparent"
+                : "border-background-300 bg-background-0 data-[active=true]:bg-background-100 data-[active=true]:border-background-300"
               }`}
 
           >
-            <Text className={`text-lg font-semibold text-typography-500 
+            <Text className={`text-lg font-semibold text-typography-950 
             ${isOpen
                 ? "text-white"
                 : ""
@@ -138,9 +140,9 @@ const Settings = ({ presetMode, handlePresetModeChange }: SettingsProps) => {
                 <Button
                   action="default"
                   variant="outline"
-                  className="data-[hover=true]:bg-tertiary-500 rounded-2xl border-slate-300 "
-                ><Save className="h-5 w-5" size={20} color="#8C8C8C" />
-                  <ButtonText className="text-typography-500 data-[hover=true]:text-white text-lg">
+                  className="data-[hover=true]:bg-tertiary-500 rounded-2xl border-typography-500 "
+                ><Save className="h-5 w-5" size={20} color={iconColor} />
+                  <ButtonText className="text-typography-950 data-[hover=true]:text-white text-lg">
                     Save
                   </ButtonText>
                 </Button>
