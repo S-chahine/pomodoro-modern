@@ -1,4 +1,8 @@
-import type { TimerDurations, TimerMode, PresetMode } from "@/types/timer";
+import type {  
+  TimerDurations,
+  TimerMode,
+  FixedPresetMode,
+ } from "@/types/timer";
 
 export const CLASSIC_DURATIONS: TimerDurations = {
   work: 25,
@@ -30,22 +34,22 @@ export const TIMER_SUBTITLES: Record<TimerMode, string> = {
   longBreak: "Long Break",
 };
 
-export const PRESETS_LABELS: Record<PresetMode, string> = {
+export const PRESETS_LABELS: Record<FixedPresetMode, string> = {
   classic : "🔹 Classic",
   deepWork: "🎯 Deep Work",
   lightMode: "⚡ Light Mode",
 };
 
-export const PRESETS_SUBTITLES: Record<PresetMode, string> = {
+export const PRESETS_SUBTITLES: Record<FixedPresetMode, string> = {
   classic: "25/5/15",
-  deepWork: "80/10/20",
+  deepWork: "50/10/20",
   lightMode: "15/3/10",
 };
 
 export const tabs: TimerMode[] = ["work", "shortBreak", "longBreak"];
-export const PresetTabs: PresetMode[] = ["classic", "deepWork", "lightMode"];
+export const PresetTabs: FixedPresetMode[] = ["classic", "deepWork", "lightMode"];
 
-export const presetDurations: Record<PresetMode, TimerDurations> = {
+export const presetDurations: Record<FixedPresetMode, TimerDurations> = {
   classic: CLASSIC_DURATIONS,
   deepWork: DEEP_WORK_DURATIONS,
   lightMode: LIGHT_MODE_DURATIONS,

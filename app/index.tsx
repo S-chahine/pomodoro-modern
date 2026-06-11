@@ -5,37 +5,58 @@ import Settings from "@/components/Settings";
 import Timer from "@/components/Timer";
 import { Timer as TimerIcon, Settings2, ChevronUp, ChevronDown } from "lucide-react-native";
 import { CLASSIC_DURATIONS, presetDurations } from "@/constants/timer";
-import { type TimerMode, type TimerStatus, type TimerDurations, type PresetMode } from "@/types/timer";
+import { type TimerMode, type TimerStatus, type TimerDurations, type FixedPresetMode, type PresetMode } from "@/types/timer";
 import { useEffect, useState } from "react";
 import { View, Text, ScrollView } from "react-native";
 import { useSound } from "@/hooks/useSound";
 import { Button } from "@/components/ui/button";
 import { useColorScheme } from "@/hooks/use-color-scheme";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
+const CUSTOM_PRESET_KEY = "customPreset";
 
 export default function HomeScreen() {
 
-
   const colorScheme = useColorScheme();
-
   const iconColor = colorScheme === "dark" ? "#8C8C8C" : "#737373";
-
   const [durations, setDurations] =
     useState<TimerDurations>(CLASSIC_DURATIONS);
-
   const [mode, setMode] = useState<TimerMode>("work");
   const [status, setStatus] = useState<TimerStatus>("idle");
   const [timeRemaining, setTimeRemaining] = useState(durations.work * 60);
   const [completedSessions, setCompletedSessions] = useState(0);
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [presetMode, setPresetMode] = useState<PresetMode>("classic");
-
   const { playClick, playComplete } = useSound();
   const [isOpen, setIsOpen] = useState(false);
-
   const totalTime = durations[mode] * 60;
-
   const progress =
     totalTime === 0 ? 0 : ((totalTime - timeRemaining) / totalTime) * 100;
+  const [customPreset, setCustomPreset] = useState<TimerDurations>(CLASSIC_DURATIONS);
+
+useEffect(() => {
+  const loadCustomPreset = async () => {
+    try {
+      const savedPreset = await AsyncStorage.getItem(CUSTOM_PRESET_KEY);
+
+      if (!savedPreset) return;
+
+      const parsedPreset = JSON.parse(savedPreset) as TimerDurations;
+
+      setCustomPreset(parsedPreset);
+      setDurations(parsedPreset);
+      setPresetMode("custom");
+      setStatus("idle");
+      setTimeRemaining(parsedPreset[mode] * 60);
+
+      console.log("Loaded custom preset:", parsedPreset);
+    } catch (error) {
+      console.log("Failed to load custom preset:", error);
+    }
+  };
+
+  loadCustomPreset();
+}, []);
 
   useEffect(() => {
     let timer: ReturnType<typeof setTimeout> | undefined;
@@ -98,24 +119,60 @@ export default function HomeScreen() {
   };
 
 
-  const handlePresetModeChange = (newPresetMode: PresetMode) => {
+  const handlePresetModeChange = (newPresetMode: FixedPresetMode) => {
+
+    const newDurations = presetDurations[newPresetMode];
+
     setPresetMode(newPresetMode);
-    setDurations(presetDurations[newPresetMode]);
+    setDurations(newDurations);
+    setStatus("idle");
+    setTimeRemaining(newDurations[mode] * 60);
   }
 
+  const handleApplyCustomDurations = (customDurations: TimerDurations) => {
+    setDurations(customDurations);
+    setPresetMode("custom");
+    setStatus("idle");
+    setTimeRemaining(customDurations[mode] * 60);
+  };
+
+ const handleSaveCustomPreset = async (customDurations: TimerDurations) => {
+  try {
+    await AsyncStorage.setItem(
+      CUSTOM_PRESET_KEY,
+      JSON.stringify(customDurations)
+    );
+
+    handleApplyCustomDurations(customDurations);
+
+    console.log("Custom preset saved:", customDurations);
+  } catch (error) {
+    console.log("Failed to save custom preset:", error);
+  }
+};
+
+const handleCustomPresetChange = (
+  field: keyof TimerDurations,
+  value: number
+) => {
+  setCustomPreset((prev) => ({
+    ...prev,
+    [field]: value,
+  }));
+};
   return (
-<ScrollView
-  className="flex-1 bg-background-0"
-  contentContainerStyle={{
-    alignItems: "center",
-    gap: 32,
-    paddingHorizontal: 16,
-    paddingVertical: 40,
-  }}
-  showsVerticalScrollIndicator={true}
-><View className="flex flex-row items-center gap-2">
+    <ScrollView
+      className="flex-1 bg-background-0"
+      contentContainerStyle={{
+        alignItems: "center",
+        gap: 32,
+        paddingHorizontal: 16,
+        paddingVertical: 40,
+      }}
+      showsVerticalScrollIndicator={true}
+    ><View className="flex flex-row items-center gap-2">
         <View className="h-12 w-12 items-center justify-center rounded-2xl bg-primary-500/20">
-            <TimerIcon color="#F25A5A" />
+          <TimerIcon color="#F25A5A" />
         </View>
 
         <Text className="text-2xl font-bold text-typography-900">
@@ -163,7 +220,12 @@ export default function HomeScreen() {
       {isOpen &&
         <Settings
           presetMode={presetMode}
+          customPreset={customPreset}
           handlePresetModeChange={handlePresetModeChange}
+          disabled={status === "running"}
+          onCustomPresetChange={handleCustomPresetChange}
+          handleApplyCustomDurations={handleApplyCustomDurations}
+          handleSaveCustomPreset={handleSaveCustomPreset}
         />}
 
 

@@ -16,7 +16,6 @@ import "react-native-reanimated";
 function AppLayout() {
   const colorScheme = useColorScheme();
   const activeTheme = colorScheme === "dark" ? "dark" : "light";
-console.log("colorScheme:", colorScheme);
   return (
     <GluestackUIProvider mode={activeTheme}>
       <ThemeProvider value={activeTheme === "dark" ? DarkTheme : DefaultTheme}>

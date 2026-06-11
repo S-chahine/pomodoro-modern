@@ -9,11 +9,17 @@ import { TimerDurations } from "@/types/timer";
 import { Save } from "lucide-react-native";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 
-const Settings = ({ presetMode, handlePresetModeChange }: SettingsProps) => {
+const Settings = ({ 
+  presetMode, 
+  customPreset,
+  handlePresetModeChange, 
+  disabled, 
+  handleApplyCustomDurations, 
+  handleSaveCustomPreset,
+  onCustomPresetChange,
+}: SettingsProps) => {
 
-  const [disabled, setDisabled] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
-  const [customPreset, setCustomPreset] = useState<TimerDurations>(CLASSIC_DURATIONS);
 
   const colorScheme = useColorScheme();
   const iconColor = colorScheme === "dark" ? "#FFFFFF" : "#8C8C8C";
@@ -81,12 +87,7 @@ const Settings = ({ presetMode, handlePresetModeChange }: SettingsProps) => {
                     min={10}
                     max={90}
                     step={1}
-                    onChange={(value) =>
-                      setCustomPreset((prev) => ({
-                        ...prev,
-                        work: value,
-                      }))
-                    }
+                    onChange={(value) => onCustomPresetChange("work", value)}
                   />
                   <Text className="text-typography-400">
                     10-90 min
@@ -99,12 +100,7 @@ const Settings = ({ presetMode, handlePresetModeChange }: SettingsProps) => {
                     min={3}
                     max={20}
                     step={1}
-                    onChange={(value) =>
-                      setCustomPreset((prev) => ({
-                        ...prev,
-                        shortBreak: value,
-                      }))
-                    }
+                      onChange={(value) => onCustomPresetChange("shortBreak", value)}
                   />
                   <Text className="text-typography-400">
                     3-20 min
@@ -117,12 +113,8 @@ const Settings = ({ presetMode, handlePresetModeChange }: SettingsProps) => {
                     min={10}
                     max={40}
                     step={1}
-                    onChange={(value) =>
-                      setCustomPreset((prev) => ({
-                        ...prev,
-                        longBreak: value,
-                      }))
-                    }
+                      onChange={(value) => onCustomPresetChange("longBreak", value)}
+
                   />
                   <Text className="text-typography-400">
                     10-40 min
@@ -134,6 +126,7 @@ const Settings = ({ presetMode, handlePresetModeChange }: SettingsProps) => {
                   action="primary"
                   variant="solid"
                   className="flex-1 rounded-2xl"
+                  onPress= {() => handleApplyCustomDurations(customPreset)}
                 >
                   <Text className="text-white font-bold">Apply</Text>
                 </Button>
@@ -141,6 +134,7 @@ const Settings = ({ presetMode, handlePresetModeChange }: SettingsProps) => {
                   action="default"
                   variant="outline"
                   className="data-[hover=true]:bg-tertiary-500 rounded-2xl border-typography-500 "
+                  onPress={() => handleSaveCustomPreset(customPreset)}
                 ><Save className="h-5 w-5" size={20} color={iconColor} />
                   <ButtonText className="text-typography-950 data-[hover=true]:text-white text-lg">
                     Save

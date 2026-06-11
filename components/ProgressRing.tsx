@@ -1,4 +1,3 @@
-import type { TimerMode } from "@/types/timer";
 import { useEffect } from "react";
 import { View } from "react-native";
 import Animated, {
@@ -7,14 +6,8 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 import Svg, { Circle } from "react-native-svg";
+import { ProgressRingProps } from "@/types/progressRing";
 
-type ProgressRingProps = {
-  progress: number;
-  mode: TimerMode;
-  size?: number;
-  strokeWidth?: number;
-  children?: React.ReactNode;
-};
 
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 

@@ -58,7 +58,7 @@ const TimerDisplay = ({ time, mode, isRunning }: TimerDisplayProps) => {
   return (
     <Animated.View
       style={animatedContainerStyle}
-      className="items-center gap-3"
+      className="items-center gap-3 justify-center"
     >
       <Text
         className={`font-mono text-6xl font-bold tracking-tight ${
@@ -69,7 +69,7 @@ const TimerDisplay = ({ time, mode, isRunning }: TimerDisplayProps) => {
       </Text>
 
       <Animated.View style={animatedSubtitleStyle}>
-        <Text className="text-sm uppercase tracking-widest text-typography-500">
+        <Text className="text-sm text-center uppercase tracking-widest text-typography-500">
           {TIMER_SUBTITLES[mode]}
         </Text>
       </Animated.View>

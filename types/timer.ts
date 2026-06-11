@@ -3,7 +3,9 @@ export type TimerStatus = "idle" | "running" | "paused" | "done";
 
 export type TimerMode = "work" | "shortBreak" | "longBreak";
 
-export type PresetMode = "classic" | "deepWork" | "lightMode";
+export type FixedPresetMode = "classic" | "deepWork" | "lightMode";
+
+export type PresetMode = FixedPresetMode | "custom";
 
 export type TimerDurations = {
   work: number;
