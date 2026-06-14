@@ -9,14 +9,17 @@ import { TimerDurations } from "@/types/timer";
 import { Save } from "lucide-react-native";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 
-const Settings = ({ 
-  presetMode, 
+const Settings = ({
+  presetMode,
   customPreset,
-  handlePresetModeChange, 
-  disabled, 
-  handleApplyCustomDurations, 
+  handlePresetModeChange,
+  disabled,
+  handleApplyCustomDurations,
   handleSaveCustomPreset,
   onCustomPresetChange,
+  savedCustomPresets,
+  handleSelectCustomPreset,
+  handleDeleteCustomPreset,
 }: SettingsProps) => {
 
   const [isOpen, setIsOpen] = useState(false);
@@ -58,13 +61,54 @@ const Settings = ({
             );
           })}
         </View>
+        {savedCustomPresets.length > 0 && (
+          <View className="w-full gap-3">
+            <Text className="text-lg font-bold text-typography-500">
+              SAVED CUSTOM PRESETS
+            </Text>
+
+            {savedCustomPresets.map((preset) => (
+              <View
+                key={preset.id}
+                className="w-full flex-row items-center justify-between rounded-2xl border border-background-300 bg-background-0 p-3"
+              >
+                <Pressable
+                  disabled={disabled}
+                  onPress={() => handleSelectCustomPreset(preset)}
+                  className="flex-1"
+                >
+                  <Text className="font-semibold text-typography-900">
+                    {preset.name}
+                  </Text>
+
+                  <Text className="text-xs text-typography-400">
+                    {preset.durations.work}/{preset.durations.shortBreak}/
+                    {preset.durations.longBreak}
+                  </Text>
+                </Pressable>
+
+                <Button
+                  action="negative"
+                  variant="link"
+                  size="sm"
+                  onPress={() => handleDeleteCustomPreset(preset.id)}
+                  className="rounded-xl px-3"
+                >
+                  <Text className="font-semibold text-error-500">
+                    Delete
+                  </Text>
+                </Button>
+              </View>
+            ))}
+          </View>
+        )}
         <View className="flex justify-center p-3 mb-10" >
           <Button
             action="primary" variant="link" size="lg"
             onPress={() => setIsOpen((prev) => !prev)}
             className={`border rounded-2xl  ${isOpen
-                ? "border-transparent bg-teal-400 data-[active=true]:bg-teal-500 data-[active=true]:border-transparent"
-                : "border-background-300 bg-background-0 data-[active=true]:bg-background-100 data-[active=true]:border-background-300"
+              ? "border-transparent bg-teal-400 data-[active=true]:bg-teal-500 data-[active=true]:border-transparent"
+              : "border-background-300 bg-background-0 data-[active=true]:bg-background-100 data-[active=true]:border-background-300"
               }`}
 
           >
@@ -100,7 +144,7 @@ const Settings = ({
                     min={3}
                     max={20}
                     step={1}
-                      onChange={(value) => onCustomPresetChange("shortBreak", value)}
+                    onChange={(value) => onCustomPresetChange("shortBreak", value)}
                   />
                   <Text className="text-typography-400">
                     3-20 min
@@ -113,7 +157,7 @@ const Settings = ({
                     min={10}
                     max={40}
                     step={1}
-                      onChange={(value) => onCustomPresetChange("longBreak", value)}
+                    onChange={(value) => onCustomPresetChange("longBreak", value)}
 
                   />
                   <Text className="text-typography-400">
@@ -126,7 +170,7 @@ const Settings = ({
                   action="primary"
                   variant="solid"
                   className="flex-1 rounded-2xl"
-                  onPress= {() => handleApplyCustomDurations(customPreset)}
+                  onPress={() => handleApplyCustomDurations(customPreset)}
                 >
                   <Text className="text-white font-bold">Apply</Text>
                 </Button>

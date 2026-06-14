@@ -5,7 +5,7 @@ import Settings from "@/components/Settings";
 import Timer from "@/components/Timer";
 import { Timer as TimerIcon, Settings2, ChevronUp, ChevronDown } from "lucide-react-native";
 import { CLASSIC_DURATIONS, presetDurations } from "@/constants/timer";
-import { type TimerMode, type TimerStatus, type TimerDurations, type FixedPresetMode, type PresetMode } from "@/types/timer";
+import { type TimerMode, type TimerStatus, type TimerDurations, type FixedPresetMode, type PresetMode, type SavedCustomPreset } from "@/types/timer";
 import { useEffect, useState } from "react";
 import { View, Text, ScrollView } from "react-native";
 import { useSound } from "@/hooks/useSound";
@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const CUSTOM_PRESET_KEY = "customPreset";
+const CUSTOM_PRESETS_KEY = "customPresets";
 
 export default function HomeScreen() {
 
@@ -33,30 +33,32 @@ export default function HomeScreen() {
   const progress =
     totalTime === 0 ? 0 : ((totalTime - timeRemaining) / totalTime) * 100;
   const [customPreset, setCustomPreset] = useState<TimerDurations>(CLASSIC_DURATIONS);
+  const [savedCustomPresets, setSavedCustomPresets] = useState<
+    SavedCustomPreset[]
+  >([]);
+  useEffect(() => {
+    const loadCustomPreset = async () => {
+      try {
+        const savedPreset = await AsyncStorage.getItem(CUSTOM_PRESETS_KEY);
 
-useEffect(() => {
-  const loadCustomPreset = async () => {
-    try {
-      const savedPreset = await AsyncStorage.getItem(CUSTOM_PRESET_KEY);
+        if (!savedPreset) return;
 
-      if (!savedPreset) return;
+        const parsedPreset = JSON.parse(savedPreset) as TimerDurations;
 
-      const parsedPreset = JSON.parse(savedPreset) as TimerDurations;
+        setCustomPreset(parsedPreset);
+        setDurations(parsedPreset);
+        setPresetMode("custom");
+        setStatus("idle");
+        setTimeRemaining(parsedPreset[mode] * 60);
 
-      setCustomPreset(parsedPreset);
-      setDurations(parsedPreset);
-      setPresetMode("custom");
-      setStatus("idle");
-      setTimeRemaining(parsedPreset[mode] * 60);
+        console.log("Loaded custom preset:", parsedPreset);
+      } catch (error) {
+        console.log("Failed to load custom preset:", error);
+      }
+    };
 
-      console.log("Loaded custom preset:", parsedPreset);
-    } catch (error) {
-      console.log("Failed to load custom preset:", error);
-    }
-  };
-
-  loadCustomPreset();
-}, []);
+    loadCustomPreset();
+  }, []);
 
   useEffect(() => {
     let timer: ReturnType<typeof setTimeout> | undefined;
@@ -136,30 +138,65 @@ useEffect(() => {
     setTimeRemaining(customDurations[mode] * 60);
   };
 
- const handleSaveCustomPreset = async (customDurations: TimerDurations) => {
+  const handleSelectCustomPreset = (preset: SavedCustomPreset) => {
+  setPresetMode("custom");
+  setCustomPreset(preset.durations);
+  setDurations(preset.durations);
+  setStatus("idle");
+  setTimeRemaining(preset.durations[mode] * 60);
+};
+
+const handleDeleteCustomPreset = async (presetId: string) => {
   try {
-    await AsyncStorage.setItem(
-      CUSTOM_PRESET_KEY,
-      JSON.stringify(customDurations)
+    const updatedPresets = savedCustomPresets.filter(
+      (preset) => preset.id !== presetId
     );
 
-    handleApplyCustomDurations(customDurations);
+    setSavedCustomPresets(updatedPresets);
 
-    console.log("Custom preset saved:", customDurations);
+    await AsyncStorage.setItem(
+      CUSTOM_PRESETS_KEY,
+      JSON.stringify(updatedPresets)
+    );
+
+    console.log("Deleted custom preset:", presetId);
   } catch (error) {
-    console.log("Failed to save custom preset:", error);
+    console.log("Failed to delete custom preset:", error);
   }
 };
 
-const handleCustomPresetChange = (
-  field: keyof TimerDurations,
-  value: number
-) => {
-  setCustomPreset((prev) => ({
-    ...prev,
-    [field]: value,
-  }));
-};
+  const handleSaveCustomPreset = async (customDurations: TimerDurations) => {
+    try {
+      const newPreset: SavedCustomPreset = {
+        id: Date.now().toString(),
+        name: `Custom ${savedCustomPresets.length + 1}`,
+        durations: customDurations,
+      };
+
+      const updatedPresets = [...savedCustomPresets, newPreset];
+
+      setSavedCustomPresets(updatedPresets);
+
+      await AsyncStorage.setItem(
+        CUSTOM_PRESETS_KEY,
+        JSON.stringify(updatedPresets)
+      );
+
+      console.log("Saved custom preset:", newPreset);
+    } catch (error) {
+      console.log("Failed to save custom preset:", error);
+    }
+  };
+
+  const handleCustomPresetChange = (
+    field: keyof TimerDurations,
+    value: number
+  ) => {
+    setCustomPreset((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
+  };
   return (
     <ScrollView
       className="flex-1 bg-background-0"
@@ -221,11 +258,14 @@ const handleCustomPresetChange = (
         <Settings
           presetMode={presetMode}
           customPreset={customPreset}
+          savedCustomPresets={savedCustomPresets}
           handlePresetModeChange={handlePresetModeChange}
           disabled={status === "running"}
           onCustomPresetChange={handleCustomPresetChange}
           handleApplyCustomDurations={handleApplyCustomDurations}
           handleSaveCustomPreset={handleSaveCustomPreset}
+          handleSelectCustomPreset={handleSelectCustomPreset}
+          handleDeleteCustomPreset={handleDeleteCustomPreset}
         />}
 
 

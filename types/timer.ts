@@ -13,3 +13,9 @@ export type TimerDurations = {
   longBreak: number;
 };
 
+export type SavedCustomPreset = {
+  id: string;
+  name: string;
+  durations: TimerDurations;
+};
+
