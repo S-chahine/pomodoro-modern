@@ -270,7 +270,7 @@ const handleDeleteCustomPreset = async (presetId: string) => {
 
 
       <Text className="max-w-xs text-center text-xs text-typography-500">
-        Complete 4 focus sessions to earn a long break. 
+        Complete 4 focus sessions to earn a long break. Stay productive!
       </Text>
 
 
