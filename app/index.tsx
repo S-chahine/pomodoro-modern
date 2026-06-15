@@ -249,9 +249,9 @@ const handleDeleteCustomPreset = async (presetId: string) => {
           Settings
         </Text>
         {isOpen ? (
-          <ChevronUp size={18} color={iconColor} />
+          <ChevronUp size={20} color={iconColor} />
         ) : (
-          <ChevronDown size={18} color={iconColor} />
+          <ChevronDown size={20} color={iconColor} />
         )}
       </Button>
       {isOpen &&
