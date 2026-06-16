@@ -254,7 +254,7 @@ const Settings = ({
                   setIsSaveDialogOpen(false);
                 }}
               >
-                <ButtonText>Cancel</ButtonText>
+                <ButtonText className="text-typography-500">Cancel</ButtonText>
               </Button>
 
               <Button
