@@ -29,6 +29,9 @@ export default function HomeScreen() {
   const [presetMode, setPresetMode] = useState<PresetMode>("classic");
   const { playClick, playComplete } = useSound();
   const [isOpen, setIsOpen] = useState(false);
+  const [activeCustomPresetId, setActiveCustomPresetId] = useState<string | null>(
+    null
+  );
   const totalTime = durations[mode] * 60;
   const progress =
     totalTime === 0 ? 0 : ((totalTime - timeRemaining) / totalTime) * 100;
@@ -43,13 +46,10 @@ export default function HomeScreen() {
 
         if (!savedPreset) return;
 
-        const parsedPreset = JSON.parse(savedPreset) as TimerDurations;
+        const parsedPreset = JSON.parse(savedPreset) as SavedCustomPreset[];
 
-        setCustomPreset(parsedPreset);
-        setDurations(parsedPreset);
-        setPresetMode("custom");
+        setSavedCustomPresets(parsedPreset);
         setStatus("idle");
-        setTimeRemaining(parsedPreset[mode] * 60);
 
         console.log("Loaded custom preset:", parsedPreset);
       } catch (error) {
@@ -129,6 +129,7 @@ export default function HomeScreen() {
     setDurations(newDurations);
     setStatus("idle");
     setTimeRemaining(newDurations[mode] * 60);
+    setActiveCustomPresetId(null);
   }
 
   const handleApplyCustomDurations = (customDurations: TimerDurations) => {
@@ -139,37 +140,48 @@ export default function HomeScreen() {
   };
 
   const handleSelectCustomPreset = (preset: SavedCustomPreset) => {
-  setPresetMode("custom");
-  setCustomPreset(preset.durations);
-  setDurations(preset.durations);
-  setStatus("idle");
-  setTimeRemaining(preset.durations[mode] * 60);
-};
+    setPresetMode("custom");
+    setCustomPreset(preset.durations);
+    setDurations(preset.durations);
+    setStatus("idle");
+    setTimeRemaining(preset.durations[mode] * 60);
+    setActiveCustomPresetId(preset.id);
+  };
 
-const handleDeleteCustomPreset = async (presetId: string) => {
-  try {
-    const updatedPresets = savedCustomPresets.filter(
-      (preset) => preset.id !== presetId
-    );
+  const handleDeleteCustomPreset = async (presetId: string) => {
+    try {
+      const updatedPresets = savedCustomPresets.filter(
+        (preset) => preset.id !== presetId
+      );
 
-    setSavedCustomPresets(updatedPresets);
+      setSavedCustomPresets(updatedPresets);
+      setDurations(CLASSIC_DURATIONS);
+      setTimeRemaining(CLASSIC_DURATIONS.work * 60);
+      setStatus("idle");
+      handleCustomPresetChange("work", 25);
+      handleCustomPresetChange("shortBreak", 5);
+      handleCustomPresetChange("longBreak", 15);
 
-    await AsyncStorage.setItem(
-      CUSTOM_PRESETS_KEY,
-      JSON.stringify(updatedPresets)
-    );
 
-    console.log("Deleted custom preset:", presetId);
-  } catch (error) {
-    console.log("Failed to delete custom preset:", error);
-  }
-};
+      await AsyncStorage.setItem(
+        CUSTOM_PRESETS_KEY,
+        JSON.stringify(updatedPresets)
+      );
 
-  const handleSaveCustomPreset = async (customDurations: TimerDurations) => {
+      console.log("Deleted custom preset:", presetId);
+    } catch (error) {
+      console.log("Failed to delete custom preset:", error);
+    }
+  };
+
+  const handleSaveCustomPreset = async (
+    customDurations: TimerDurations,
+    presetName: string
+  ) => {
     try {
       const newPreset: SavedCustomPreset = {
         id: Date.now().toString(),
-        name: `Custom ${savedCustomPresets.length + 1}`,
+        name: presetName,
         durations: customDurations,
       };
 
@@ -192,6 +204,7 @@ const handleDeleteCustomPreset = async (presetId: string) => {
     field: keyof TimerDurations,
     value: number
   ) => {
+    setActiveCustomPresetId(null);
     setCustomPreset((prev) => ({
       ...prev,
       [field]: value,
@@ -249,9 +262,9 @@ const handleDeleteCustomPreset = async (presetId: string) => {
           Settings
         </Text>
         {isOpen ? (
-          <ChevronUp size={20} color={iconColor} />
+          <ChevronUp size={18} color={iconColor} />
         ) : (
-          <ChevronDown size={20} color={iconColor} />
+          <ChevronDown size={18} color={iconColor} />
         )}
       </Button>
       {isOpen &&
@@ -261,6 +274,7 @@ const handleDeleteCustomPreset = async (presetId: string) => {
           savedCustomPresets={savedCustomPresets}
           handlePresetModeChange={handlePresetModeChange}
           disabled={status === "running"}
+          activeCustomPresetId={activeCustomPresetId}
           onCustomPresetChange={handleCustomPresetChange}
           handleApplyCustomDurations={handleApplyCustomDurations}
           handleSaveCustomPreset={handleSaveCustomPreset}

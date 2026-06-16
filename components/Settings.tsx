@@ -1,12 +1,11 @@
-import { View, Text, Pressable } from "react-native";
+import { View, Text, Pressable, Modal, TextInput } from "react-native";
 import { Button, ButtonText } from "@/components/ui/button";
 import { SettingsProps } from "@/types/settings";
-import { CLASSIC_DURATIONS, PresetTabs } from "@/constants/timer";
+import { PresetTabs } from "@/constants/timer";
 import { useState } from "react";
 import { PRESETS_LABELS, PRESETS_SUBTITLES } from "@/constants/timer";
 import NumberStepper from "./ui/NumberStepper";
-import { TimerDurations } from "@/types/timer";
-import { Save } from "lucide-react-native";
+import { Save, Trash2, CheckIcon } from "lucide-react-native";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 
 const Settings = ({
@@ -14,6 +13,7 @@ const Settings = ({
   customPreset,
   handlePresetModeChange,
   disabled,
+  activeCustomPresetId,
   handleApplyCustomDurations,
   handleSaveCustomPreset,
   onCustomPresetChange,
@@ -26,6 +26,20 @@ const Settings = ({
 
   const colorScheme = useColorScheme();
   const iconColor = colorScheme === "dark" ? "#FFFFFF" : "#8C8C8C";
+  const [isSaveDialogOpen, setIsSaveDialogOpen] = useState(false);
+  const [presetName, setPresetName] = useState("");
+
+
+  const handleConfirmSave = () => {
+    const trimmedName = presetName.trim();
+
+    if (!trimmedName) return;
+
+    handleSaveCustomPreset(customPreset, trimmedName);
+
+    setPresetName("");
+    setIsSaveDialogOpen(false);
+  };
 
   return (
     <View className="flex gap-2 py-4 justify-center items-center rounded-2xl bg-background-muted/20">
@@ -64,42 +78,59 @@ const Settings = ({
         {savedCustomPresets.length > 0 && (
           <View className="w-full gap-3">
             <Text className="text-lg font-bold text-typography-500">
-              SAVED CUSTOM PRESETS
+              SAVED PROFILES
             </Text>
+            {savedCustomPresets.map((preset) => {
+              const isCustomPresetActive = activeCustomPresetId === preset.id;
 
-            {savedCustomPresets.map((preset) => (
-              <View
-                key={preset.id}
-                className="w-full flex-row items-center justify-between rounded-2xl border border-background-300 bg-background-0 p-3"
-              >
-                <Pressable
-                  disabled={disabled}
-                  onPress={() => handleSelectCustomPreset(preset)}
-                  className="flex-1"
+              return (
+                <View
+                  key={preset.id}
+                  className={`w-full flex-row items-center justify-between rounded-2xl border p-3 ${isCustomPresetActive
+                    ? "border-primary-500 bg-primary-500/10"
+                    : "border-background-300 bg-background-0"
+                    }`}
                 >
-                  <Text className="font-semibold text-typography-900">
-                    {preset.name}
-                  </Text>
-
-                  <Text className="text-xs text-typography-400">
-                    {preset.durations.work}/{preset.durations.shortBreak}/
-                    {preset.durations.longBreak}
-                  </Text>
-                </Pressable>
-
-                <Button
-                  action="negative"
-                  variant="link"
-                  size="sm"
-                  onPress={() => handleDeleteCustomPreset(preset.id)}
-                  className="rounded-xl px-3"
-                >
-                  <Text className="font-semibold text-error-500">
-                    Delete
-                  </Text>
-                </Button>
-              </View>
-            ))}
+                  <Pressable
+                    disabled={disabled}
+                    onPress={() => handleSelectCustomPreset(preset)}
+                    className="flex-1"
+                  >
+                    <View className="flex-row items-center gap-2">
+                      <Text
+                        className={`font-semibold ${isCustomPresetActive
+                          ? "text-primary-500"
+                          : "text-typography-900"
+                          }`}
+                      >
+                        {preset.name}
+                      </Text>
+                        <Text
+                      className={`text-s ${isCustomPresetActive
+                        ? "text-primary-500"
+                        : "text-typography-400"
+                        }`}
+                    >
+                      {preset.durations.work}/{preset.durations.shortBreak}/
+                      {preset.durations.longBreak}
+                    </Text>
+                    </View>
+                  </Pressable>
+                  {isCustomPresetActive && (
+                    <CheckIcon className="h-5 w-5" size={20} color="#F25A5A" />
+                  )}
+                  <Button
+                    action="negative"
+                    variant="link"
+                    size="sm"
+                    onPress={() => handleDeleteCustomPreset(preset.id)}
+                    className="rounded-xl px-3"
+                  >
+                    <Trash2 className="h-5 w-5" size={20} color={iconColor} />
+                  </Button>
+                </View>
+              );
+            })}
           </View>
         )}
         <View className="flex justify-center p-3 mb-10" >
@@ -178,7 +209,7 @@ const Settings = ({
                   action="default"
                   variant="outline"
                   className="data-[hover=true]:bg-tertiary-500 rounded-2xl border-typography-500 "
-                  onPress={() => handleSaveCustomPreset(customPreset)}
+                  onPress={() => setIsSaveDialogOpen(true)}
                 ><Save className="h-5 w-5" size={20} color={iconColor} />
                   <ButtonText className="text-typography-950 data-[hover=true]:text-white text-lg">
                     Save
@@ -189,6 +220,58 @@ const Settings = ({
           }
         </View>
       </View>
+      <Modal
+        visible={isSaveDialogOpen}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setIsSaveDialogOpen(false)}
+      >
+        <View className="flex-1 items-center justify-center bg-black/60 px-6">
+          <View className="w-full max-w-sm rounded-2xl bg-background-0 p-5 gap-4">
+            <Text className="text-xl font-bold text-typography-900">
+              Save Profile
+            </Text>
+
+            <Text className="text-sm text-typography-500">
+              Give your custome settings timer a name.
+            </Text>
+
+            <TextInput
+              value={presetName}
+              onChangeText={setPresetName}
+              placeholder="e.g., Study Mode"
+              placeholderTextColor="#8C8C8C"
+              className="rounded-xl border border-background-300 bg-background-muted/20 px-4 py-3 text-typography-900"
+            />
+
+            <View className="flex-row gap-3">
+              <Button
+                action="default"
+                variant="outline"
+                className="flex-1 rounded-2xl"
+                onPress={() => {
+                  setPresetName("");
+                  setIsSaveDialogOpen(false);
+                }}
+              >
+                <ButtonText>Cancel</ButtonText>
+              </Button>
+
+              <Button
+                action="primary"
+                variant="solid"
+                className="flex-1 rounded-2xl"
+                disabled={!presetName.trim()}
+                onPress={handleConfirmSave}
+              >
+                <ButtonText className="text-white">
+                  Save
+                </ButtonText>
+              </Button>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 };
