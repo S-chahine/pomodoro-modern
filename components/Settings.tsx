@@ -42,12 +42,12 @@ const Settings = ({
   };
 
   return (
-    <View className="flex gap-2 py-4 justify-center items-center rounded-2xl bg-background-muted/20">
+    <View className="flex gap-2 py-4 pl-2 justify-center items-center rounded-2xl bg-background-muted/20">
       <View className="flex max-w-sm gap-2">
         <Text className="text-typography-500 text-lg font-bold">
           PRESETS
         </Text>
-        <View className="flex-row gap-2" >
+        <View className="flex-row gap-2 p-2" >
           {PresetTabs.map((tab) => {
             const isActive = presetMode === tab;
 
@@ -56,7 +56,7 @@ const Settings = ({
                 <Pressable
                   disabled={disabled}
                   onPress={() => handlePresetModeChange(tab)}
-                  className={`h-16 w-32 items-center rounded-xl px-2  py-3 ${isActive
+                  className={`h-16 w-28 items-center rounded-xl px-0  py-3 ${isActive
                     ? "bg-primary-500/20" : ""
                     } ${disabled ? "opacity-50" : "opacity-100"}`}
                 >
