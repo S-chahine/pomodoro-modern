@@ -1,7 +1,6 @@
 import Controls from "@/components/Controls";
 import Mode from "@/components/Mode";
 import SessionCounter from "@/components/SessionCounter";
-import CelebrationBanner from "@/components/CelebrationBanner";
 import Settings from "@/components/Settings";
 import Timer from "@/components/Timer";
 import { Timer as TimerIcon, Settings2, ChevronUp, ChevronDown } from "lucide-react-native";
@@ -13,6 +12,8 @@ import { useSound } from "@/hooks/useSound";
 import { Button } from "@/components/ui/button";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import ThumbsUp from '@/components/ThumbsUp';
+
 
 const CUSTOM_PRESETS_KEY = "customPresets";
 
@@ -25,7 +26,7 @@ export default function HomeScreen() {
   const [mode, setMode] = useState<TimerMode>("work");
   const [status, setStatus] = useState<TimerStatus>("idle");
   const [timeRemaining, setTimeRemaining] = useState(durations.work * 60);
-  const [completedSessions, setCompletedSessions] = useState(3);
+  const [completedSessions, setCompletedSessions] = useState(0);
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [presetMode, setPresetMode] = useState<PresetMode>("classic");
   const { playClick, playComplete, playCelebrate } = useSound();
@@ -35,6 +36,8 @@ export default function HomeScreen() {
     null
   );
   const totalTime = durations[mode] * 60;
+  const [celebrateTrigger, setCelebrateTrigger] = useState(false);
+
   const progress =
     totalTime === 0 ? 0 : ((totalTime - timeRemaining) / totalTime) * 100;
   const [customPreset, setCustomPreset] = useState<TimerDurations>(CLASSIC_DURATIONS);
@@ -71,54 +74,55 @@ export default function HomeScreen() {
       }, 1000);
     }
 
-   if (status === "running" && timeRemaining === 0) {
-  if (mode === "work") {
-    const nextCompletedSessions = completedSessions + 1;
+    if (status === "running" && timeRemaining === 0) {
+      if (mode === "work") {
+        const nextCompletedSessions = completedSessions + 1;
 
-    if (soundEnabled) {
-      if (nextCompletedSessions >= 4) {
-        playCelebrate();
-      } else {
+        if (soundEnabled) {
+          if (nextCompletedSessions >= 4) {
+            playCelebrate();
+            triggerCelebration();
+          } else {
+            playComplete();
+          }
+        }
+
+        setCompletedSessions(() => {
+          if (nextCompletedSessions >= 4) {
+            setMode("longBreak");
+            setTimeRemaining(durations.longBreak * 60);
+            setStatus("idle");
+            return 4;
+          }
+
+          setMode("shortBreak");
+          setTimeRemaining(durations.shortBreak * 60);
+          setStatus("idle");
+          return nextCompletedSessions;
+        });
+
+        return;
+      }
+
+      if (soundEnabled) {
         playComplete();
       }
-    }
 
-    setCompletedSessions(() => {
-      if (nextCompletedSessions >= 4) {
-        setMode("longBreak");
-        setTimeRemaining(durations.longBreak * 60);
+      if (mode === "shortBreak") {
+        setMode("work");
+        setTimeRemaining(durations.work * 60);
         setStatus("idle");
-        return 4;
+        return;
       }
 
-      setMode("shortBreak");
-      setTimeRemaining(durations.shortBreak * 60);
-      setStatus("idle");
-      return nextCompletedSessions;
-    });
-
-    return;
-  }
-
-  if (soundEnabled) {
-    playComplete();
-  }
-
-  if (mode === "shortBreak") {
-    setMode("work");
-    setTimeRemaining(durations.work * 60);
-    setStatus("idle");
-    return;
-  }
-
-  if (mode === "longBreak") {
-    setCompletedSessions(0);
-    setMode("work");
-    setTimeRemaining(durations.work * 60);
-    setStatus("idle");
-    return;
-  }
-}
+      if (mode === "longBreak") {
+        setCompletedSessions(0);
+        setMode("work");
+        setTimeRemaining(durations.work * 60);
+        setStatus("idle");
+        return;
+      }
+    }
 
     return () => {
       if (timer) clearTimeout(timer);
@@ -254,10 +258,8 @@ export default function HomeScreen() {
 
   const triggerCelebration = () => {
     setShowCelebration(true);
-
-    setTimeout(() => {
-      setShowCelebration(false);
-    }, 2500);
+    setCelebrateTrigger(prev => !prev);  // toggle so useEffect re-fires even if called twice
+    setTimeout(() => setShowCelebration(false), 2500);
   };
 
   return (
@@ -287,7 +289,7 @@ export default function HomeScreen() {
         disabled={status === "running"}
       />
       {showCelebration && (
-        <CelebrationBanner />
+       <ThumbsUp trigger={celebrateTrigger} />
       )}
       <Timer
         timeRemaining={timeRemaining}
