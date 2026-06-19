@@ -159,7 +159,7 @@ const Settings = ({
                   <NumberStepper
                     label="Focus"
                     value={customPreset.work}
-                    min={1}
+                    min={10}
                     max={90}
                     step={1}
                     onChange={(value) => onCustomPresetChange("work", value)}
@@ -172,7 +172,7 @@ const Settings = ({
                   <NumberStepper
                     label="Short"
                     value={customPreset.shortBreak}
-                    min={1}
+                    min={3}
                     max={20}
                     step={1}
                     onChange={(value) => onCustomPresetChange("shortBreak", value)}
@@ -185,7 +185,7 @@ const Settings = ({
                   <NumberStepper
                     label={"Long"}
                     value={customPreset.longBreak}
-                    min={1}
+                    min={10}
                     max={40}
                     step={1}
                     onChange={(value) => onCustomPresetChange("longBreak", value)}

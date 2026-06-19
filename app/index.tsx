@@ -1,6 +1,7 @@
 import Controls from "@/components/Controls";
 import Mode from "@/components/Mode";
 import SessionCounter from "@/components/SessionCounter";
+import CelebrationBanner from "@/components/CelebrationBanner";
 import Settings from "@/components/Settings";
 import Timer from "@/components/Timer";
 import { Timer as TimerIcon, Settings2, ChevronUp, ChevronDown } from "lucide-react-native";
@@ -29,6 +30,7 @@ export default function HomeScreen() {
   const [presetMode, setPresetMode] = useState<PresetMode>("classic");
   const { playClick, playComplete } = useSound();
   const [isOpen, setIsOpen] = useState(false);
+  const [showCelebration, setShowCelebration] = useState(false);
   const [activeCustomPresetId, setActiveCustomPresetId] = useState<string | null>(
     null
   );
@@ -61,59 +63,60 @@ export default function HomeScreen() {
   }, []);
 
   useEffect(() => {
-  let timer: ReturnType<typeof setTimeout> | undefined;
+    let timer: ReturnType<typeof setTimeout> | undefined;
 
-  if (status === "running" && timeRemaining > 0) {
-    timer = setTimeout(() => {
-      setTimeRemaining((prev) => prev - 1);
-    }, 1000);
-  }
-
-  if (status === "running" && timeRemaining === 0) {
-    if (soundEnabled) {
-      playComplete();
+    if (status === "running" && timeRemaining > 0) {
+      timer = setTimeout(() => {
+        setTimeRemaining((prev) => prev - 1);
+      }, 1000);
     }
 
-    if (mode === "work") {
-      setCompletedSessions((prev) => {
-        const nextCompletedSessions = prev + 1;
+    if (status === "running" && timeRemaining === 0) {
+      if (soundEnabled) {
+        playComplete();
+      }
 
-        if (nextCompletedSessions >= 4) {
-          setMode("longBreak");
-          setTimeRemaining(durations.longBreak * 60);
+      if (mode === "work") {
+        setCompletedSessions((prev) => {
+          const nextCompletedSessions = prev + 1;
+
+          if (nextCompletedSessions >= 4) {
+            triggerCelebration();
+            setMode("longBreak");
+            setTimeRemaining(durations.longBreak * 60);
+            setStatus("idle");
+            return 4;
+          }
+
+          setMode("shortBreak");
+          setTimeRemaining(durations.shortBreak * 60);
           setStatus("idle");
-          return 4;
-        }
+          return nextCompletedSessions;
+        });
 
-        setMode("shortBreak");
-        setTimeRemaining(durations.shortBreak * 60);
+        return;
+      }
+
+      if (mode === "shortBreak") {
+        setMode("work");
+        setTimeRemaining(durations.work * 60);
         setStatus("idle");
-        return nextCompletedSessions;
-      });
+        return;
+      }
 
-      return;
+      if (mode === "longBreak") {
+        setCompletedSessions(0);
+        setMode("work");
+        setTimeRemaining(durations.work * 60);
+        setStatus("idle");
+        return;
+      }
     }
 
-    if (mode === "shortBreak") {
-      setMode("work");
-      setTimeRemaining(durations.work * 60);
-      setStatus("idle");
-      return;
-    }
-
-    if (mode === "longBreak") {
-      setCompletedSessions(0);
-      setMode("work");
-      setTimeRemaining(durations.work * 60);
-      setStatus("idle");
-      return;
-    }
-  }
-
-  return () => {
-    if (timer) clearTimeout(timer);
-  };
-}, [timeRemaining, status, mode, durations, soundEnabled, playComplete]);
+    return () => {
+      if (timer) clearTimeout(timer);
+    };
+  }, [timeRemaining, status, mode, durations, soundEnabled, playComplete]);
 
 
   const handleStart = () => {
@@ -241,6 +244,15 @@ export default function HomeScreen() {
       [field]: value,
     }));
   };
+
+  const triggerCelebration = () => {
+    setShowCelebration(true);
+
+    setTimeout(() => {
+      setShowCelebration(false);
+    }, 2500);
+  };
+
   return (
     <ScrollView
       className="flex-1 bg-background-0"
@@ -267,7 +279,9 @@ export default function HomeScreen() {
         handleModeChange={handleModeChange}
         disabled={status === "running"}
       />
-
+      {showCelebration && (
+        <CelebrationBanner />
+      )}
       <Timer
         timeRemaining={timeRemaining}
         mode={mode}
