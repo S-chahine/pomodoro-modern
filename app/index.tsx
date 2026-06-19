@@ -61,28 +61,59 @@ export default function HomeScreen() {
   }, []);
 
   useEffect(() => {
-    let timer: ReturnType<typeof setTimeout> | undefined;
+  let timer: ReturnType<typeof setTimeout> | undefined;
 
-    if (status === "running" && timeRemaining > 0) {
-      timer = setTimeout(() => {
-        setTimeRemaining((prev) => prev - 1);
-      }, 1000);
-    } else if (status === "running" && timeRemaining === 0) {
-      setStatus("done");
+  if (status === "running" && timeRemaining > 0) {
+    timer = setTimeout(() => {
+      setTimeRemaining((prev) => prev - 1);
+    }, 1000);
+  }
 
-      if (soundEnabled) {
-        playComplete();
-      }
-
-      if (mode === "work") {
-        setCompletedSessions((prev) => Math.min(prev + 1, 4));
-      }
+  if (status === "running" && timeRemaining === 0) {
+    if (soundEnabled) {
+      playComplete();
     }
 
-    return () => {
-      if (timer) clearTimeout(timer);
-    };
-  }, [timeRemaining, status, mode, presetMode]);
+    if (mode === "work") {
+      setCompletedSessions((prev) => {
+        const nextCompletedSessions = prev + 1;
+
+        if (nextCompletedSessions >= 4) {
+          setMode("longBreak");
+          setTimeRemaining(durations.longBreak * 60);
+          setStatus("idle");
+          return 4;
+        }
+
+        setMode("shortBreak");
+        setTimeRemaining(durations.shortBreak * 60);
+        setStatus("idle");
+        return nextCompletedSessions;
+      });
+
+      return;
+    }
+
+    if (mode === "shortBreak") {
+      setMode("work");
+      setTimeRemaining(durations.work * 60);
+      setStatus("idle");
+      return;
+    }
+
+    if (mode === "longBreak") {
+      setCompletedSessions(0);
+      setMode("work");
+      setTimeRemaining(durations.work * 60);
+      setStatus("idle");
+      return;
+    }
+  }
+
+  return () => {
+    if (timer) clearTimeout(timer);
+  };
+}, [timeRemaining, status, mode, durations, soundEnabled, playComplete]);
 
 
   const handleStart = () => {
@@ -283,7 +314,7 @@ export default function HomeScreen() {
         />}
 
 
-      <Text className="max-w-xs text-center text-xs text-typography-500">
+      <Text className="max-w-xs text-center text-s text-typography-500">
         Complete 4 focus sessions to earn a long break. Stay productive!
       </Text>
 
