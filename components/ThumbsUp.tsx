@@ -24,9 +24,9 @@ export default function ThumbsUp({ trigger }: { trigger: boolean }) {
 
     // Animate in with a spring bounce, then fade out
     scale.value = withSequence(
-      withSpring(1.4, { damping: 4, stiffness: 300 }),
+      withSpring(1.4, { damping: 4, stiffness: 160 }),
       withSpring(1,   { damping: 8, stiffness: 200 }),
-      withDelay(800, withTiming(0, { duration: 300 }))
+      withDelay(1500, withTiming(0, { duration: 500 }))
     );
     opacity.value = withSequence(
       withTiming(1, { duration: 150 }),
