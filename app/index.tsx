@@ -25,10 +25,10 @@ export default function HomeScreen() {
   const [mode, setMode] = useState<TimerMode>("work");
   const [status, setStatus] = useState<TimerStatus>("idle");
   const [timeRemaining, setTimeRemaining] = useState(durations.work * 60);
-  const [completedSessions, setCompletedSessions] = useState(0);
+  const [completedSessions, setCompletedSessions] = useState(3);
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [presetMode, setPresetMode] = useState<PresetMode>("classic");
-  const { playClick, playComplete } = useSound();
+  const { playClick, playComplete, playCelebrate } = useSound();
   const [isOpen, setIsOpen] = useState(false);
   const [showCelebration, setShowCelebration] = useState(false);
   const [activeCustomPresetId, setActiveCustomPresetId] = useState<string | null>(
@@ -71,47 +71,54 @@ export default function HomeScreen() {
       }, 1000);
     }
 
-    if (status === "running" && timeRemaining === 0) {
-      if (soundEnabled) {
+   if (status === "running" && timeRemaining === 0) {
+  if (mode === "work") {
+    const nextCompletedSessions = completedSessions + 1;
+
+    if (soundEnabled) {
+      if (nextCompletedSessions >= 4) {
+        playCelebrate();
+      } else {
         playComplete();
       }
-
-      if (mode === "work") {
-        setCompletedSessions((prev) => {
-          const nextCompletedSessions = prev + 1;
-
-          if (nextCompletedSessions >= 4) {
-            triggerCelebration();
-            setMode("longBreak");
-            setTimeRemaining(durations.longBreak * 60);
-            setStatus("idle");
-            return 4;
-          }
-
-          setMode("shortBreak");
-          setTimeRemaining(durations.shortBreak * 60);
-          setStatus("idle");
-          return nextCompletedSessions;
-        });
-
-        return;
-      }
-
-      if (mode === "shortBreak") {
-        setMode("work");
-        setTimeRemaining(durations.work * 60);
-        setStatus("idle");
-        return;
-      }
-
-      if (mode === "longBreak") {
-        setCompletedSessions(0);
-        setMode("work");
-        setTimeRemaining(durations.work * 60);
-        setStatus("idle");
-        return;
-      }
     }
+
+    setCompletedSessions(() => {
+      if (nextCompletedSessions >= 4) {
+        setMode("longBreak");
+        setTimeRemaining(durations.longBreak * 60);
+        setStatus("idle");
+        return 4;
+      }
+
+      setMode("shortBreak");
+      setTimeRemaining(durations.shortBreak * 60);
+      setStatus("idle");
+      return nextCompletedSessions;
+    });
+
+    return;
+  }
+
+  if (soundEnabled) {
+    playComplete();
+  }
+
+  if (mode === "shortBreak") {
+    setMode("work");
+    setTimeRemaining(durations.work * 60);
+    setStatus("idle");
+    return;
+  }
+
+  if (mode === "longBreak") {
+    setCompletedSessions(0);
+    setMode("work");
+    setTimeRemaining(durations.work * 60);
+    setStatus("idle");
+    return;
+  }
+}
 
     return () => {
       if (timer) clearTimeout(timer);

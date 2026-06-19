@@ -5,6 +5,8 @@ export function useSound() {
   const completePlayer = useAudioPlayer(
     require("@/assets/sounds/complete.mp3")
   );
+  const celebratePlayer = useAudioPlayer(require("@/assets/sounds/celebrate.mp3"));
+
 
   const playClick = () => {
     clickPlayer.seekTo(0);
@@ -15,9 +17,14 @@ export function useSound() {
     completePlayer.seekTo(0);
     completePlayer.play();
   };
+   const playCelebrate = () => {
+    celebratePlayer.seekTo(0);
+    celebratePlayer.play();
+  };
 
   return {
     playClick,
     playComplete,
+    playCelebrate,
   };
 }
