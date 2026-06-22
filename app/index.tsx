@@ -2,8 +2,8 @@ import Controls from "@/components/Controls";
 import Mode from "@/components/Mode";
 import SessionCounter from "@/components/SessionCounter";
 import Settings from "@/components/Settings";
-import Timer from "@/components/Timer";
 import ThumbsUp from "@/components/ThumbsUp";
+import Timer from "@/components/Timer";
 import { Button } from "@/components/ui/button";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { useCustomPresets } from "@/hooks/useCustomPresets";
@@ -127,7 +127,7 @@ export default function HomeScreen() {
         />
       )}
 
-      <Text className="max-w-xs text-center text-sm text-typography-500">
+      <Text className="max-w-s text-center text-sm text-typography-500">
         Complete 4 focus sessions to earn a long break. Stay productive!
       </Text>
     </ScrollView>
